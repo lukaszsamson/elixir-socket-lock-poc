@@ -5,7 +5,31 @@ defmodule Locked do
     File.rm(@socket_path)
   end
 
+  defp maybe_bind(socket, :win32) do
+    temp_path = "tmp_#{System.unique_integer([:positive])}"
+    case :socket.bind(socket, %{family: :local, path: temp_path}) do
+      :ok -> {:ok, temp_path}
+      error -> error
+    end
+  end
+  defp maybe_bind(_, _) do
+    {:ok, nil}
+  end
+
   defp wait(socket) do
+    {major, _} = :os.type()
+    case maybe_bind(socket, major) do
+      {:ok, temp_socket_path} ->
+        result = do_wait(socket)
+        if temp_socket_path do
+          File.rm(temp_socket_path)
+        end
+        result
+      other -> other
+    end
+  end
+
+  defp do_wait(socket) do
     case :socket.connect(socket, %{family: :local, path: @socket_path}) do
       :ok ->
         case :socket.recv(socket) do
@@ -17,6 +41,9 @@ defmodule Locked do
             :ok
         end
       {:error, :econnrefused} ->
+        rm()
+        :ok
+      {:error, %{info: :econnrefused}} ->
         rm()
         :ok
       {:error, :closed} ->
@@ -31,6 +58,9 @@ defmodule Locked do
         case :socket.send(socket, @done_msg) do
           :ok ->
             :socket.shutdown(socket, :read_write) |> dbg
+            # TODO check if this works correctly
+            # seems to be required on windows
+            :socket.close(socket) |> dbg
             :ok
           {:error, :epipe} ->
             :socket.close(socket) |> dbg
