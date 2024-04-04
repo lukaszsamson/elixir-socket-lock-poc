@@ -1,7 +1,7 @@
 defmodule POC do
   @socket_path Path.join(__DIR__, "socket")
   def rm do
-    File.rm_rf(@socket_path)
+    File.rm(@socket_path)
   end
 
   def open do

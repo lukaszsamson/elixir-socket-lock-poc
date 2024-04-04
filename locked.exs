@@ -2,7 +2,7 @@ defmodule Locked do
   @socket_path Path.join(__DIR__, "socket")
   @done_msg "done"
   defp rm do
-    File.rm_rf(@socket_path)
+    File.rm(@socket_path)
   end
 
   defp wait(socket) do

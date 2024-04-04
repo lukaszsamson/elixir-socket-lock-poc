@@ -18,7 +18,7 @@ defmodule POCTest do
 
   test "socket file deleted after bind", %{socket: socket} do
     assert :ok = POC.bind(socket)
-    assert {:ok, _} = POC.rm()
+    assert :ok = POC.rm()
   end
 
   test "bind fails if in use",
