@@ -46,6 +46,8 @@ defmodule Locked do
       {:error, %{info: :econnrefused}} ->
         rm()
         :ok
+      {:error, :enoent} ->
+        :ok
       {:error, :closed} ->
         rm()
         :ok

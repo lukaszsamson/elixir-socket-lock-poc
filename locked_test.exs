@@ -27,6 +27,15 @@ defmodule POCTest do
     wait_for_down(refs)
   end
 
+  test "multiple processes no delay" do
+    refs = for _ <- 1..30 do
+      {_pid, ref} = spawn_monitor(fn -> System.cmd("elixir", ["locked.exs"], into: IO.stream()) end)
+      ref
+    end
+
+    wait_for_down(refs)
+  end
+
   test "multiple processes with crashes" do
     refs = for _ <- 1..30 do
       Process.sleep(200..1000 |> Enum.random)
