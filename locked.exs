@@ -1,7 +1,7 @@
 defmodule Locked do
   @socket_path Path.join(__DIR__, "socket")
   @done_msg "done"
-  defp rm do
+  def rm do
     File.rm(@socket_path)
   end
 
@@ -129,6 +129,11 @@ defmodule Locked do
   end
 end
 
+case System.argv() do
+  ["rm-out"] -> Locked.rm()
+  _ -> :ok
+end
+
 IO.puts("calling enter_critical_section")
 lock = Locked.enter_critical_section()
 IO.puts("inside critical section")
@@ -141,6 +146,8 @@ case System.argv() do
   [] -> :ok
   ["crash"] -> raise "foo"
   ["halt"] -> System.halt(1)
+  ["rm-in"] -> Locked.rm()
+  ["rm-out"] -> :ok
 end
 
 IO.puts("calling exit_critical_section")

@@ -51,4 +51,20 @@ defmodule POCTest do
 
     wait_for_down(refs)
   end
+
+  test "multiple processes with socket rm" do
+    refs = for _ <- 1..30 do
+      Process.sleep(200..1000 |> Enum.random)
+
+      arg = case 1..5 |> Enum.random do
+        1 -> ["rm-out"]
+        2 -> ["rm-in"]
+        _ -> []
+      end
+      {_pid, ref} = spawn_monitor(fn -> System.cmd("elixir", ["locked.exs"] ++ arg, into: IO.stream()) end)
+      ref
+    end
+
+    wait_for_down(refs)
+  end
 end
